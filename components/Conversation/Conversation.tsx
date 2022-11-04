@@ -8,6 +8,7 @@ import React, {
 import { MessagesList, MessageComposer } from './'
 import Loader from '../../components/Loader'
 import XmtpContext from '../../contexts/xmtp'
+import WalletContext from '../../contexts/wallet'
 import useConversation from '../../hooks/useConversation'
 
 type ConversationProps = {
@@ -28,7 +29,6 @@ const Conversation = ({
     recipientWalletAddr,
     scrollToMessagesEndRef
   )
-
   const { convoMessages, loadingConversations } = useContext(XmtpContext)
 
   const messages = useMemo(

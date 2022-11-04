@@ -1,5 +1,6 @@
 import { createContext } from 'react'
 import { Signer } from 'ethers'
+import {ENSProfile} from "../components/WalletProvider";
 
 export type WalletContextType = {
   signer: Signer | undefined
@@ -7,6 +8,7 @@ export type WalletContextType = {
   resolveName: (name: string) => Promise<string | undefined>
   lookupAddress: (address: string) => Promise<string | undefined>
   getAvatarUrl: (address: string) => Promise<string | undefined>
+  getENSProfile: (name: string) => Promise<ENSProfile | undefined>
   connect: () => Promise<Signer | undefined>
   disconnect: () => void
 }
@@ -17,6 +19,7 @@ export const WalletContext = createContext<WalletContextType>({
   resolveName: async () => undefined,
   lookupAddress: async () => undefined,
   getAvatarUrl: async () => undefined,
+  getENSProfile: async () => undefined,
   connect: async () => undefined,
   disconnect: async () => undefined,
 })

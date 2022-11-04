@@ -3,7 +3,7 @@ import { useRouter } from 'next/router'
 import AddressInput from '../AddressInput'
 import { WalletContext } from '../../contexts/wallet'
 import XmtpContext from '../../contexts/xmtp'
-import { checkIfPathIsEns } from '../../helpers'
+import { checkIfPathIsSupportedEns } from '../../helpers'
 
 type RecipientInputProps = {
   recipientWalletAddress: string | undefined
@@ -22,7 +22,7 @@ const RecipientControl = ({
   recipientWalletAddress,
   onSubmit,
 }: RecipientInputProps): JSX.Element => {
-  const { resolveName, lookupAddress } = useContext(WalletContext)
+  const { resolveName, lookupAddress, getENSProfile } = useContext(WalletContext)
   const { client } = useContext(XmtpContext)
   const router = useRouter()
   const [recipientInputMode, setRecipientInputMode] = useState(
@@ -55,7 +55,7 @@ const RecipientControl = ({
       const name = await lookupAddress(address)
       setHasName(!!name)
     }
-    if (recipientWalletAddress && !checkIfPathIsEns(recipientWalletAddress)) {
+    if (recipientWalletAddress && !checkIfPathIsSupportedEns(recipientWalletAddress)) {
       setRecipientInputMode(RecipientInputMode.Submitted)
       handleAddressLookup(recipientWalletAddress)
     } else {
@@ -71,7 +71,7 @@ const RecipientControl = ({
       }
       const input = e.target as HTMLInputElement
       const recipientValue = value || data.recipient.value
-      if (recipientValue.endsWith('eth')) {
+      if (checkIfPathIsSupportedEns(recipientValue)) {
         setRecipientInputMode(RecipientInputMode.FindingEntry)
         const address = await resolveName(recipientValue)
         if (address) {
@@ -137,7 +137,7 @@ const RecipientControl = ({
 
       {recipientInputMode === RecipientInputMode.Submitted ? (
         <div className="text-md text-n-300 text-sm font-mono ml-10 md:ml-8 pb-1 md:pb-[1px]">
-          {hasName ? recipientWalletAddress : <br />}
+          {hasName ? recipientWalletAddress :  <br />}
         </div>
       ) : (
         <div className="text-sm md:text-xs text-n-300 ml-[29px] pl-2 md:pl-0 pb-1 md:pb-[3px]">

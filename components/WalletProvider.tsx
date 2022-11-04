@@ -13,6 +13,31 @@ const cachedLookupAddress = new Map<string, string | undefined>()
 const cachedResolveName = new Map<string, string | undefined>()
 const cachedGetAvatarUrl = new Map<string, string | undefined>()
 
+export interface TextRecords {
+  email: string;
+  url: string;
+  description: string;
+  notice: string;
+  keywords: string;
+  github: string;
+  discord: string;
+  reddit: string;
+  twitter: string;
+  /** content field is immutable */
+  content: string;
+  avatar: string;
+}
+
+export interface ENSProfile {
+  primaryName: string // via reverselookup
+  lookupName: string // via user input
+  address: string
+  textRecords: TextRecords
+}
+
+// ens -> profile
+const cachedENSProfile = new Map<string, ENSProfile | undefined>()
+
 type WalletProviderProps = {
   children?: React.ReactNode
 }
@@ -65,6 +90,35 @@ export const WalletProvider = ({
     return avatarUrl
   }, [])
 
+  const getENSProfile = useCallback(async (name: string) => {
+    if (cachedENSProfile.has(name)) {
+      return cachedENSProfile.get(name)
+    }
+
+    const ensProfile = {lookupName: name} as ENSProfile
+
+    ensProfile.address = (await provider?.resolveName(name)) || ''
+    ensProfile.primaryName = (ensProfile.address != '' && (await provider?.lookupAddress(ensProfile.address))) || ''
+    ensProfile.textRecords = {} as TextRecords
+
+    const ensResolver = (await provider?.getResolver(name)) || undefined
+
+    ensProfile.textRecords.url = (await ensResolver?.getText('url')) || ''
+    ensProfile.textRecords.email = (await ensResolver?.getText('email')) || ''
+    ensProfile.textRecords.avatar = (await ensResolver?.getText('avatar')) || ''
+    ensProfile.textRecords.discord = (await ensResolver?.getText('discord')) || ''
+    ensProfile.textRecords.reddit = (await ensResolver?.getText('reddit')) || ''
+    ensProfile.textRecords.twitter = (await ensResolver?.getText('twitter')) || ''
+    ensProfile.textRecords.description = (await ensResolver?.getText('description')) || ''
+    ensProfile.textRecords.github = (await ensResolver?.getText('github')) || ''
+    ensProfile.textRecords.content = (await ensResolver?.getText('content')) || ''
+    ensProfile.textRecords.notice = (await ensResolver?.getText('notice')) || ''
+    ensProfile.textRecords.keywords = (await ensResolver?.getText('keywords')) || ''
+
+    cachedENSProfile.set(name, ensProfile)
+    return ensProfile
+  }, [])
+
   // Note, this triggers a re-render on acccount change and on diconnect.
   const disconnect = useCallback(() => {
     if (!web3Modal) return
@@ -113,7 +167,7 @@ export const WalletProvider = ({
 
   useEffect(() => {
     const infuraId =
-      process.env.NEXT_PUBLIC_INFURA_ID || 'b6058e03f2cd4108ac890d3876a56d0d'
+      process.env.NEXT_PUBLIC_INFURA_ID
     const providerOptions: IProviderOptions = {
       walletconnect: {
         package: WalletConnectProvider,
@@ -182,6 +236,7 @@ export const WalletProvider = ({
         resolveName,
         lookupAddress,
         getAvatarUrl,
+        getENSProfile,
         connect,
         disconnect,
       }}

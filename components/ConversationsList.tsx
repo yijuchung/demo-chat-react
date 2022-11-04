@@ -10,7 +10,7 @@ import {
   truncate,
   formatDate,
   checkPath,
-  checkIfPathIsEns,
+  checkIfPathIsSupportedEns,
 } from '../helpers'
 import Avatar from './Avatar'
 import XmtpContext from '../contexts/xmtp'
@@ -123,7 +123,7 @@ const ConversationsList = (): JSX.Element => {
   const reloadIfQueryParamPresent = async () => {
     if (checkPath()) {
       let queryAddress = window.location.pathname.replace('/dm/', '')
-      if (checkIfPathIsEns(queryAddress)) {
+      if (checkIfPathIsSupportedEns(queryAddress)) {
         queryAddress = (await resolveName(queryAddress)) ?? ''
       }
       if (queryAddress) {

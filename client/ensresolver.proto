@@ -1,0 +1,94 @@
+syntax = "proto3";
+
+package api;
+
+service ENSResolver {
+  rpc ResolveAddress(ResolveAddressRequest) returns (ResolveAddressResponse) {}
+  rpc ReverseResolveDomain(ReverseResolveDomainRequest) returns (ReverseResolveDomainResponse) {}
+  rpc ReverseResolveL1EnsDomain(ReverseResolveL1EnsDomainRequest) returns (ReverseResolveL1EnsDomainResponse) {}
+  rpc ReverseResolveL1EnsDomainWithTextRecords(ReverseResolveL1EnsDomainWithTextRecordsRequest) returns (ReverseResolveL1EnsDomainWithTextRecordsResponse) {}
+  rpc ResolveL1EnsDomainWithTextRecords(ResolveL1EnsDomainWithTextRecordsRequest) returns (ResolveL1EnsDomainWithTextRecordsResponse) {}
+}
+
+message ResolveAddressRequest {
+  string name = 1;
+  string asset = 2;
+}
+
+message ResolveAddressResponse {
+  string address = 1;
+  string avatarURL = 2;
+
+  message HomoglyphWarning {
+    bool containsHomoglyphs = 1;
+
+    message Homoglyph {
+      int32 index = 1;
+      string homoglyph = 2;
+      string looksLike = 3;
+    }
+
+    repeated Homoglyph homoglyphs = 3;
+  }
+
+  HomoglyphWarning homoglyphWarning = 3;
+}
+
+message ReverseResolveDomainRequest {
+  string address = 1;
+  string asset = 2;
+}
+
+message ReverseResolveDomainResponse {
+  string name = 1;
+}
+
+// github.cbhq.net/identity/subdomain-did-service/gen/go/coinbase/subdomain_did_service/common
+// Eventually, we want to just import the property list for subdomain did.
+// But since the sanitization of the text records should be treated differently, a separate copy
+// of Property for L1 ENS is created.
+message TextRecords {
+  string email = 1;
+  string url = 2;
+
+  string description = 3;
+  string notice = 4;
+  string keywords = 5;
+  string github = 6;
+  string discord = 7;
+  string reddit = 8;
+  string twitter = 9;
+
+  // content field is immutable
+  string content = 10;
+  string avatar = 11;
+}
+
+message ReverseResolveL1EnsDomainRequest {
+  string ethereum_address = 1;
+}
+
+message ReverseResolveL1EnsDomainResponse {
+  string name = 1;
+  string avatar_url = 2;
+}
+
+message ReverseResolveL1EnsDomainWithTextRecordsRequest {
+  string ethereum_address = 1;
+  repeated string prop_keys = 2;
+}
+
+message ReverseResolveL1EnsDomainWithTextRecordsResponse {
+  string address = 1;
+  TextRecords textRecords = 2;
+}
+
+message ResolveL1EnsDomainWithTextRecordsRequest {
+  string ethereum_namespace = 1;
+  repeated string prop_keys = 2;
+}
+
+message ResolveL1EnsDomainWithTextRecordsResponse {
+  string address = 1;
+  TextRecords textRecords = 2;
+}

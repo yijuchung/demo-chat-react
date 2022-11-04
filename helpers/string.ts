@@ -27,8 +27,8 @@ export const checkPath = () => {
   return window.location.pathname !== '/' && window.location.pathname !== '/dm'
 }
 
-export const checkIfPathIsEns = (address: string): boolean => {
-  return address.includes('eth')
+export const checkIfPathIsSupportedEns = (address: string): boolean => {
+  return address.endsWith('.eth') || address.endsWith('.cb.id')
 }
 
 export const shortAddress = (addr: string): string =>
